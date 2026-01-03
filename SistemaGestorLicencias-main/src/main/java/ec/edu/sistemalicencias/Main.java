@@ -3,6 +3,7 @@ package ec.edu.sistemalicencias;
 
 import ec.edu.sistemalicencias.controller.LicenciaController;
 import ec.edu.sistemalicencias.config.DatabaseConfig;
+import ec.edu.sistemalicencias.view.AnalistView;
 import ec.edu.sistemalicencias.view.MainView;
 
 import javax.swing.*;
@@ -42,8 +43,12 @@ public class Main {
 
             // Iniciar ventana principal
             LicenciaController controller = new LicenciaController();
+            AnalistView analistView = new AnalistView(controller);
+            analistView.setVisible(true);
+
+            
             MainView mainView = new MainView(controller);
-            mainView.setVisible(true);
+            mainView.setVisible(false);
 
         });
     }

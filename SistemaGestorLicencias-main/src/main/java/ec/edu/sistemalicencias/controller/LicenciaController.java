@@ -87,6 +87,7 @@ public class LicenciaController {
         return licenciaService.emitirLicencia(conductorId, tipoLicencia, pruebaPsicometricaId);
     }
 
+
     /**
      * Busca un conductor por cédula
      * @param cedula Número de cédula
