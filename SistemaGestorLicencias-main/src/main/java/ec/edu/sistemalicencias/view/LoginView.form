@@ -59,12 +59,12 @@
                   <text value="Contraseña:"/>
                 </properties>
               </component>
-              <component id="df98b" class="javax.swing.JButton" binding="BtnIngreso">
+              <component id="df98b" class="javax.swing.JButton" binding="BtnLimpiar">
                 <constraints>
                   <grid row="2" column="0" row-span="1" col-span="2" vsize-policy="0" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
                 </constraints>
                 <properties>
-                  <text value="Ingreso de Sesion"/>
+                  <text value="Limpiar"/>
                 </properties>
               </component>
               <component id="2fed5" class="javax.swing.JPasswordField" binding="txtPassword">
@@ -83,12 +83,12 @@
                   <model/>
                 </properties>
               </component>
-              <component id="46335" class="javax.swing.JButton" binding="BtnLimpiar">
+              <component id="46335" class="javax.swing.JButton" binding="BtnIngreso">
                 <constraints>
                   <grid row="2" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
                 </constraints>
                 <properties>
-                  <text value="Limpiar"/>
+                  <text value="Iniciar Sesión"/>
                 </properties>
               </component>
             </children>

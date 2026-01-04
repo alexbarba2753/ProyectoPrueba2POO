@@ -1,12 +1,10 @@
 
 package ec.edu.sistemalicencias;
 
-import ec.edu.sistemalicencias.config.GestorJPA;
 import ec.edu.sistemalicencias.controller.LicenciaController;
 import ec.edu.sistemalicencias.config.DatabaseConfig;
-import ec.edu.sistemalicencias.view.AnalistView;
+import ec.edu.sistemalicencias.view.AdminView;
 import ec.edu.sistemalicencias.view.LoginView;
-import ec.edu.sistemalicencias.view.MainView;
 
 import javax.swing.*;
 
@@ -46,18 +44,19 @@ public class Main {
             }
 
 
-
+            //AdminView adminView = new AdminView(new LicenciaController());
+            //adminView.setVisible(true);
 
             LoginView loginView = new LoginView(new LicenciaController());
             loginView.setVisible(true);
 /*
             // Iniciar ventana principal
             LicenciaController controller = new LicenciaController();
-            AnalistView analistView = new AnalistView(controller);
+            AnalistTestView analistView = new AnalistTestView(controller);
             analistView.setVisible(false);
 
             
-            MainView mainView = new MainView(controller);
+            AnalistView mainView = new AnalistView(controller);
             mainView.setVisible(false);
 */
         });

@@ -6,12 +6,12 @@ import ec.edu.sistemalicencias.model.entities.Conductor;
 import ec.edu.sistemalicencias.model.entities.Licencia;
 import ec.edu.sistemalicencias.model.entities.PruebaPsicometrica;
 import ec.edu.sistemalicencias.model.entities.Usuario;
-import ec.edu.sistemalicencias.model.exceptions.BaseDatosException;
 import ec.edu.sistemalicencias.model.exceptions.LicenciaException;
 import ec.edu.sistemalicencias.service.LicenciaService;
 import ec.edu.sistemalicencias.util.PDFGenerator;
+import ec.edu.sistemalicencias.view.AdminView;
+import ec.edu.sistemalicencias.view.AnalistTestView;
 import ec.edu.sistemalicencias.view.AnalistView;
-import ec.edu.sistemalicencias.view.MainView;
 
 import javax.swing.*;
 import java.io.File;
@@ -321,24 +321,16 @@ public class LicenciaController {
 
     // ===================== LOGIN / SEGURIDAD =====================
 
-    /**
-     * Valida las credenciales del usuario
-     * @param rol Rol seleccionado
-     * @param password Contraseña ingresada
-     * @return true si es válido
-     */
+
     public Usuario login(String user, String pass){
         return new UsuarioDAO().login(user, pass);
     }
 
-    /**
-     * Abre la vista correspondiente según el rol
-     * @param rol Rol del usuario
-     */
+
     public void abrirVistaSegunUsuario(Usuario u){
 
         if(u.getRol().equalsIgnoreCase("ADMIN")){
-            new MainView(this).setVisible(true); // crud usuarios
+            new AdminView(this).setVisible(true); // crud usuarios
         }else{
             new AnalistView(this).setVisible(true); // sistema licencias
         }
