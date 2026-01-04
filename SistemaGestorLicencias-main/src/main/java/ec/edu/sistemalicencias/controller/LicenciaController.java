@@ -1,12 +1,17 @@
 package ec.edu.sistemalicencias.controller;
 
 import com.itextpdf.text.DocumentException;
+import ec.edu.sistemalicencias.dao.UsuarioDAO;
 import ec.edu.sistemalicencias.model.entities.Conductor;
 import ec.edu.sistemalicencias.model.entities.Licencia;
 import ec.edu.sistemalicencias.model.entities.PruebaPsicometrica;
+import ec.edu.sistemalicencias.model.entities.Usuario;
+import ec.edu.sistemalicencias.model.exceptions.BaseDatosException;
 import ec.edu.sistemalicencias.model.exceptions.LicenciaException;
 import ec.edu.sistemalicencias.service.LicenciaService;
 import ec.edu.sistemalicencias.util.PDFGenerator;
+import ec.edu.sistemalicencias.view.AnalistView;
+import ec.edu.sistemalicencias.view.MainView;
 
 import javax.swing.*;
 import java.io.File;
@@ -322,32 +327,20 @@ public class LicenciaController {
      * @param password Contraseña ingresada
      * @return true si es válido
      */
-    public boolean validarLogin(String rol, String password) {
-
-        // 🔐 Credenciales simples (proyecto universitario)
-        if (rol.equals("Administrador") && password.equals("admin123")) {
-            return true;
-        }
-
-        if (rol.equals("Analista") && password.equals("analista123")) {
-            return true;
-        }
-
-        return false;
+    public Usuario login(String user, String pass){
+        return new UsuarioDAO().login(user, pass);
     }
 
     /**
      * Abre la vista correspondiente según el rol
      * @param rol Rol del usuario
      */
-    public void abrirVistaPorRol(String rol) {
+    public void abrirVistaSegunUsuario(Usuario u){
 
-        if (rol.equals("Administrador")) {
-            new ec.edu.sistemalicencias.view.MainView(this).setVisible(true);
-        }
-
-        if (rol.equals("Analista")) {
-            new ec.edu.sistemalicencias.view.AnalistView(this).setVisible(true);
+        if(u.getRol().equalsIgnoreCase("ADMIN")){
+            new MainView(this).setVisible(true); // crud usuarios
+        }else{
+            new AnalistView(this).setVisible(true); // sistema licencias
         }
     }
 

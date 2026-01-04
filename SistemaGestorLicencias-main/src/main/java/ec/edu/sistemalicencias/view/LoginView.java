@@ -3,7 +3,10 @@ package ec.edu.sistemalicencias.view;
 import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
 import ec.edu.sistemalicencias.controller.LicenciaController;
-import ec.edu.sistemalicencias.model.entities.Conductor;
+import ec.edu.sistemalicencias.dao.UsuarioDAO;
+import ec.edu.sistemalicencias.model.entities.Usuario;
+import ec.edu.sistemalicencias.model.exceptions.BaseDatosException;
+
 
 import javax.swing.*;
 import javax.swing.border.TitledBorder;
@@ -12,71 +15,56 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 public class LoginView extends JFrame {
+
     private final LicenciaController controller;
-    private Conductor conductorSeleccionado;
-
-
-    private JButton BttIngreso;
+    private JComboBox<Usuario> cmbUser;
+    private JPasswordField txtPassword;
+    private JButton BtnIngreso, BtnLimpiar;
     private JPanel PanelPrincipal;
-    private JLabel icono;
-    private JLabel login;
-    private JPasswordField txtPass;
-    private JComboBox comboBoxUser;
-    private JButton limpiarButton;
-
 
     public LoginView(LicenciaController controller) {
         this.controller = controller;
 
         setContentPane(PanelPrincipal);
-
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setSize(1200, 645);
         setLocationRelativeTo(null);
         setTitle("Inicio de Sesion");
         setResizable(false);
 
+        cargarUsuarios();
 
-        limpiarButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                txtPass.setText("");
+        BtnLimpiar.addActionListener(e -> txtPassword.setText(""));
 
-            }
-        });
+        BtnIngreso.addActionListener(e -> {
 
-        BttIngreso.addActionListener(e -> {
+            Usuario u = (Usuario) cmbUser.getSelectedItem();
+            String pass = new String(txtPassword.getPassword());
 
-            String rol = comboBoxUser.getSelectedItem().toString();
-            String pass = new String(txtPass.getPassword());
+            Usuario validado = controller.login(u.getUsername(), pass);
 
-
-            if (pass.isEmpty()) {
-                JOptionPane.showMessageDialog(this, "Ingrese la contraseña");
+            if (validado == null) {
+                JOptionPane.showMessageDialog(
+                        this,
+                        "Contraseña incorrecta",
+                        "Error de inicio de sesión",
+                        JOptionPane.ERROR_MESSAGE
+                );
                 return;
             }
 
-            if (rol.equals("Seleccione un rol")) {
-                JOptionPane.showMessageDialog(this, "Seleccione un rol");
-                return;
-            }
-
-            if (pass.isEmpty()) {
-                JOptionPane.showMessageDialog(this, "Ingrese la contraseña");
-                return;
-            }
-
-            // 🔐 VALIDACIÓN REAL
-            if (!controller.validarLogin(rol, pass)) {
-                JOptionPane.showMessageDialog(this, "Credenciales incorrectas");
-                return;
-            }
-
-            controller.abrirVistaPorRol(rol);
-            dispose(); // cerrar login
+            dispose();
+            controller.abrirVistaSegunUsuario(validado);
         });
 
 
+    }
+
+    private void cargarUsuarios() {
+        UsuarioDAO dao = new UsuarioDAO();
+        for (Usuario u : dao.listar()) {
+            cmbUser.addItem(u);
+        }
     }
 
 
@@ -117,20 +105,18 @@ public class LoginView extends JFrame {
         final JLabel label3 = new JLabel();
         label3.setText("Contraseña:");
         panel3.add(label3, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
-        BttIngreso = new JButton();
-        BttIngreso.setText("Ingreso de Sesion");
-        panel3.add(BttIngreso, new GridConstraints(2, 0, 1, 2, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
-        txtPass = new JPasswordField();
-        panel3.add(txtPass, new GridConstraints(1, 1, 1, 2, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(150, -1), null, 0, false));
-        comboBoxUser = new JComboBox();
+        BtnIngreso = new JButton();
+        BtnIngreso.setText("Ingreso de Sesion");
+        panel3.add(BtnIngreso, new GridConstraints(2, 0, 1, 2, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        txtPassword = new JPasswordField();
+        panel3.add(txtPassword, new GridConstraints(1, 1, 1, 2, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(150, -1), null, 0, false));
+        cmbUser = new JComboBox();
         final DefaultComboBoxModel defaultComboBoxModel1 = new DefaultComboBoxModel();
-        defaultComboBoxModel1.addElement("Administrador");
-        defaultComboBoxModel1.addElement("Analista");
-        comboBoxUser.setModel(defaultComboBoxModel1);
-        panel3.add(comboBoxUser, new GridConstraints(0, 1, 1, 2, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
-        limpiarButton = new JButton();
-        limpiarButton.setText("Limpiar");
-        panel3.add(limpiarButton, new GridConstraints(2, 2, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        cmbUser.setModel(defaultComboBoxModel1);
+        panel3.add(cmbUser, new GridConstraints(0, 1, 1, 2, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        BtnLimpiar = new JButton();
+        BtnLimpiar.setText("Limpiar");
+        panel3.add(BtnLimpiar, new GridConstraints(2, 2, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         final JPanel panel4 = new JPanel();
         panel4.setLayout(new GridLayoutManager(1, 1, new Insets(0, 0, 0, 0), -1, -1));
         PanelPrincipal.add(panel4, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));

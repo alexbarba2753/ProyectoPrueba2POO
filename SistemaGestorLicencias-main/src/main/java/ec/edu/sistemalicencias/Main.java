@@ -1,6 +1,7 @@
 
 package ec.edu.sistemalicencias;
 
+import ec.edu.sistemalicencias.config.GestorJPA;
 import ec.edu.sistemalicencias.controller.LicenciaController;
 import ec.edu.sistemalicencias.config.DatabaseConfig;
 import ec.edu.sistemalicencias.view.AnalistView;
@@ -22,6 +23,8 @@ public class Main {
      * Método principal que inicia la aplicación
      */
     public static void main(String[] args) {
+
+
         // Configurar Look and Feel del sistema operativo
         try {
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
@@ -43,9 +46,11 @@ public class Main {
             }
 
 
+
+
             LoginView loginView = new LoginView(new LicenciaController());
             loginView.setVisible(true);
-
+/*
             // Iniciar ventana principal
             LicenciaController controller = new LicenciaController();
             AnalistView analistView = new AnalistView(controller);
@@ -54,13 +59,17 @@ public class Main {
             
             MainView mainView = new MainView(controller);
             mainView.setVisible(false);
-
+*/
         });
+
+
+
     }
 
     /**
      * Muestra una pantalla de inicio con información del sistema
      */
+
     private static void mostrarPantallaInicio() {
         JOptionPane.showMessageDialog(
                 null,
@@ -81,6 +90,7 @@ public class Main {
     /**
      * Muestra un mensaje de error si no se puede conectar a la base de datos
      */
+
     private static void mostrarErrorConexion() {
         String mensaje = "ERROR DE CONEXIÓN A BASE DE DATOS\n\n" +
                 "No se pudo establecer conexión con MySQL.\n\n" +
@@ -102,4 +112,6 @@ public class Main {
 
         System.exit(1);
     }
+
+
 }

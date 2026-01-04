@@ -289,21 +289,30 @@ public class AnalistView extends JFrame {
     }
 
     /**
-     * Cierra la aplicación con confirmación
+     * Cierra sesión y vuelve al login
      */
     private void salirAplicacion() {
+
         int opcion = JOptionPane.showConfirmDialog(
                 this,
-                "¿Está seguro que desea salir del sistema?",
-                "Confirmar Salida",
+                "¿Desea cerrar sesión?",
+                "Cerrar sesión",
                 JOptionPane.YES_NO_OPTION,
                 JOptionPane.QUESTION_MESSAGE
         );
 
         if (opcion == JOptionPane.YES_OPTION) {
-            System.exit(0);
+
+            // Cierra esta ventana
+            this.dispose();
+
+            // Regresa al login
+            new LoginView(
+                    new LicenciaController()
+            ).setVisible(true);
         }
     }
+
 
     /**
      * Muestra un mensaje de error

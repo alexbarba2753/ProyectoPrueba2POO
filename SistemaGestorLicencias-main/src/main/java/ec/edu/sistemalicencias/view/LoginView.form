@@ -59,7 +59,7 @@
                   <text value="Contraseña:"/>
                 </properties>
               </component>
-              <component id="df98b" class="javax.swing.JButton" binding="BttIngreso">
+              <component id="df98b" class="javax.swing.JButton" binding="BtnIngreso">
                 <constraints>
                   <grid row="2" column="0" row-span="1" col-span="2" vsize-policy="0" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
                 </constraints>
@@ -67,7 +67,7 @@
                   <text value="Ingreso de Sesion"/>
                 </properties>
               </component>
-              <component id="2fed5" class="javax.swing.JPasswordField" binding="txtPass">
+              <component id="2fed5" class="javax.swing.JPasswordField" binding="txtPassword">
                 <constraints>
                   <grid row="1" column="1" row-span="1" col-span="2" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false">
                     <preferred-size width="150" height="-1"/>
@@ -75,18 +75,15 @@
                 </constraints>
                 <properties/>
               </component>
-              <component id="81bb5" class="javax.swing.JComboBox" binding="comboBoxUser">
+              <component id="81bb5" class="javax.swing.JComboBox" binding="cmbUser">
                 <constraints>
                   <grid row="0" column="1" row-span="1" col-span="2" vsize-policy="0" hsize-policy="2" anchor="8" fill="1" indent="0" use-parent-layout="false"/>
                 </constraints>
                 <properties>
-                  <model>
-                    <item value="Administrador"/>
-                    <item value="Analista"/>
-                  </model>
+                  <model/>
                 </properties>
               </component>
-              <component id="46335" class="javax.swing.JButton" binding="limpiarButton" default-binding="true">
+              <component id="46335" class="javax.swing.JButton" binding="BtnLimpiar">
                 <constraints>
                   <grid row="2" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
                 </constraints>

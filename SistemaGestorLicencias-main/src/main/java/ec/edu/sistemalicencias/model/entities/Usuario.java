@@ -1,11 +1,34 @@
 package ec.edu.sistemalicencias.model.entities;
 
-public class Usuario {
+import java.io.Serializable;
+import javax.persistence.*;
+/*import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;*/
+
+
+@Entity
+@Table(name = "usuarios")
+public class Usuario implements Serializable {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @Column(name="username", unique = true, nullable = false)
     private String username;
+
+    @Column(name="password", nullable = false)
     private String password;
-    private String rol;
-    private boolean activo;
+
+    @Column(name="rol", nullable = false)
+    private String rol; // ADMIN o ANALISTA
+
+    private boolean activo = true;
+
+    @Override
+    public String toString() {
+        return username;
+    }
 
     public Long getId() {
         return id;
