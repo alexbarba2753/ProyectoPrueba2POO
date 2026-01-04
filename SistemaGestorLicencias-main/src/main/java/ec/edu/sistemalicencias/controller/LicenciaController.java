@@ -309,4 +309,52 @@ public class LicenciaController {
 
         return respuesta == JOptionPane.YES_OPTION;
     }
+
+
+
+
+
+    // ===================== LOGIN / SEGURIDAD =====================
+
+    /**
+     * Valida las credenciales del usuario
+     * @param rol Rol seleccionado
+     * @param password Contraseña ingresada
+     * @return true si es válido
+     */
+    public boolean validarLogin(String rol, String password) {
+
+        // 🔐 Credenciales simples (proyecto universitario)
+        if (rol.equals("Administrador") && password.equals("admin123")) {
+            return true;
+        }
+
+        if (rol.equals("Analista") && password.equals("analista123")) {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * Abre la vista correspondiente según el rol
+     * @param rol Rol del usuario
+     */
+    public void abrirVistaPorRol(String rol) {
+
+        if (rol.equals("Administrador")) {
+            new ec.edu.sistemalicencias.view.MainView(this).setVisible(true);
+        }
+
+        if (rol.equals("Analista")) {
+            new ec.edu.sistemalicencias.view.AnalistView(this).setVisible(true);
+        }
+    }
+
+
+
+
+
+
+
 }
