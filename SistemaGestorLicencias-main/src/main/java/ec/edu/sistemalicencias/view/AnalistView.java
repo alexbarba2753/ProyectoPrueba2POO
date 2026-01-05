@@ -178,6 +178,9 @@ public class AnalistView extends JFrame {
         // Botón Generar Documento PDF
         btnGenerarDocumento.addActionListener(e -> generarDocumentoPDF());
 
+        // Botón Generar Reportes de Usuarios
+        btnGenerarReportes.addActionListener(e -> generarReporteUsuarios());
+
         // Botón Salir
         btnSalir.addActionListener(e -> salirAplicacion());
     }
@@ -378,6 +381,42 @@ public class AnalistView extends JFrame {
                 "Error",
                 JOptionPane.ERROR_MESSAGE
         );
+    }
+
+
+    private void generarReporteUsuarios() {
+        JFileChooser chooser = new JFileChooser();
+        chooser.setDialogTitle("Guardar Reporte de Usuarios");
+        chooser.setSelectedFile(new java.io.File("Reporte_Usuarios_ANT.pdf"));
+
+        if (chooser.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) {
+            String ruta = chooser.getSelectedFile().getAbsolutePath();
+
+            // Asegurar extensión .pdf
+            if (!ruta.toLowerCase().endsWith(".pdf")) {
+                ruta += ".pdf";
+            }
+
+            try {
+                // Obtener lista actualizada desde el DAO
+                ec.edu.sistemalicencias.dao.UsuarioDAO dao = new ec.edu.sistemalicencias.dao.UsuarioDAO();
+                java.util.List<ec.edu.sistemalicencias.model.entities.Usuario> lista = dao.listar();
+
+                // Llamar al generador
+                ec.edu.sistemalicencias.util.PDFGenerator.generarReporteUsuariosPDF(lista, ruta);
+
+                JOptionPane.showMessageDialog(this, "Reporte generado con éxito en:\n" + ruta,
+                        "Éxito", JOptionPane.INFORMATION_MESSAGE);
+
+                // Opcional: Abrir el PDF automáticamente
+                java.awt.Desktop.getDesktop().open(new java.io.File(ruta));
+
+            } catch (Exception e) {
+                JOptionPane.showMessageDialog(this, "Error al generar el PDF: " + e.getMessage(),
+                        "Error", JOptionPane.ERROR_MESSAGE);
+                e.printStackTrace();
+            }
+        }
     }
 
     /**

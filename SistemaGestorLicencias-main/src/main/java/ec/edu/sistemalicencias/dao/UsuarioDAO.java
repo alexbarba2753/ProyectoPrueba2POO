@@ -40,7 +40,10 @@ public class UsuarioDAO {
 
     public void eliminar(Long id){
         em.getTransaction().begin();
-        em.remove(em.find(Usuario.class,id));
+        Usuario u = em.find(Usuario.class, id);
+        if (u != null) {
+            em.remove(u);
+        }
         em.getTransaction().commit();
     }
 }

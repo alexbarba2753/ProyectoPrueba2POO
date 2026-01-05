@@ -43,6 +43,7 @@ public class DatabaseConfig {
         this.password = "123456";
          */
 
+
         try {
             // Cargar el driver JDBC
             Class.forName(driver);

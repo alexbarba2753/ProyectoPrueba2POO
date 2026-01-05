@@ -331,7 +331,7 @@ public class LicenciaController {
 
         if(u.getRol().equalsIgnoreCase("ADMIN")){
             new AdminView(this).setVisible(true); // crud usuarios
-        }else{
+        }else if (u.getRol().equalsIgnoreCase("ANALISTA")){
             new AnalistView(this).setVisible(true); // sistema licencias
         }
     }

@@ -292,4 +292,85 @@ public class PDFGenerator {
         celdaValor.setPadding(5);
         tabla.addCell(celdaValor);
     }
+
+
+    /**
+     * Genera un reporte PDF con el listado de todos los usuarios del sistema.
+     */
+    public static void generarReporteUsuariosPDF(java.util.List<ec.edu.sistemalicencias.model.entities.Usuario> usuarios, String rutaArchivo)
+            throws DocumentException, IOException {
+
+        Document documento = new Document(PageSize.A4.rotate()); // Horizontal para que quepa mejor la tabla
+        PdfWriter.getInstance(documento, new FileOutputStream(rutaArchivo));
+
+        documento.open();
+
+        // --- ENCABEZADO PERSONALIZADO PARA REPORTES ---
+        Paragraph titulo = new Paragraph("AGENCIA NACIONAL DE TRÁNSITO", FONT_TITULO);
+        titulo.setAlignment(Element.ALIGN_CENTER);
+        documento.add(titulo);
+
+        Paragraph subtitulo = new Paragraph("REPORTE GENERAL DE USUARIOS DEL SISTEMA", FONT_SUBTITULO);
+        subtitulo.setAlignment(Element.ALIGN_CENTER);
+        subtitulo.setSpacingAfter(20);
+        documento.add(subtitulo);
+
+        // --- TABLA DE USUARIOS ---
+        PdfPTable tabla = new PdfPTable(4); // Columnas: ID, Usuario, Rol, Estado
+        tabla.setWidthPercentage(100);
+        tabla.setSpacingBefore(10);
+
+        // Configurar anchos (10%, 40%, 30%, 20%)
+        tabla.setWidths(new float[]{10f, 40f, 30f, 20f});
+
+        // Encabezados de tabla
+        String[] encabezados = {"ID", "NOMBRE DE USUARIO", "ROL ASIGNADO", "ESTADO"};
+        for (String encabezado : encabezados) {
+            PdfPCell cell = new PdfPCell(new Phrase(encabezado, FONT_CAMPO));
+            cell.setBackgroundColor(new BaseColor(40, 60, 100)); // Azul corporativo
+            cell.setHorizontalAlignment(Element.ALIGN_CENTER);
+            cell.setPadding(8);
+            // Texto en blanco para el encabezado
+            cell.getPhrase().getFont().setColor(BaseColor.WHITE);
+            tabla.addCell(cell);
+        }
+
+        // Llenar datos de la lista
+        for (ec.edu.sistemalicencias.model.entities.Usuario u : usuarios) {
+            tabla.addCell(crearCeldaCentrada(u.getId().toString()));
+            tabla.addCell(crearCeldaIzquierda(u.getUsername()));
+            tabla.addCell(crearCeldaCentrada(u.getRol()));
+
+            String estadoStr = u.isActivo() ? "ACTIVO" : "INACTIVO";
+            PdfPCell celdaEstado = crearCeldaCentrada(estadoStr);
+            if(u.isActivo()) celdaEstado.getPhrase().getFont().setColor(new BaseColor(0, 150, 0)); // Verde
+            else celdaEstado.getPhrase().getFont().setColor(BaseColor.RED);
+
+            tabla.addCell(celdaEstado);
+        }
+
+        documento.add(tabla);
+
+        // Agregar pie de página (reutilizando tu lógica existente)
+        agregarPiePagina(documento);
+
+        documento.close();
+    }
+
+    // Métodos helper para celdas
+    private static PdfPCell crearCeldaCentrada(String texto) {
+        PdfPCell cell = new PdfPCell(new Phrase(texto, FONT_NORMAL));
+        cell.setHorizontalAlignment(Element.ALIGN_CENTER);
+        cell.setPadding(5);
+        return cell;
+    }
+
+    private static PdfPCell crearCeldaIzquierda(String texto) {
+        PdfPCell cell = new PdfPCell(new Phrase(texto, FONT_NORMAL));
+        cell.setHorizontalAlignment(Element.ALIGN_LEFT);
+        cell.setPadding(5);
+        cell.setPaddingLeft(10);
+        return cell;
+    }
+
 }

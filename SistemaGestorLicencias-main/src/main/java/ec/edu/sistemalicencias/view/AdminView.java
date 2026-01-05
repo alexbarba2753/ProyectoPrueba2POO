@@ -4,6 +4,9 @@ import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
 import com.intellij.uiDesigner.core.Spacer;
 import ec.edu.sistemalicencias.controller.LicenciaController;
+import ec.edu.sistemalicencias.dao.UsuarioDAO;
+import ec.edu.sistemalicencias.model.entities.Usuario;
+
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.TitledBorder;
@@ -11,6 +14,8 @@ import javax.swing.plaf.FontUIResource;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.text.StyleContext;
 import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.util.Locale;
 
 public class AdminView extends JFrame {
@@ -43,6 +48,7 @@ public class AdminView extends JFrame {
         inicializarComponentes();
         configurarEstilos();
         configurarEventos();
+        cargarTabla();
 
         setTitle("Administración de Usuarios - ANT");
         setContentPane(mainPanel);
@@ -238,6 +244,22 @@ public class AdminView extends JFrame {
     }
 
     private void configurarEventos() {
+
+        // Evento para cargar datos de la tabla a los campos al hacer clic
+        tblUsers.addMouseListener(new MouseAdapter() {
+            public void mouseClicked(MouseEvent evt) {
+                int fila = tblUsers.getSelectedRow();
+                if (fila != -1) {
+                    txtNewUser.setText(modelo.getValueAt(fila, 0).toString());
+                    // La contraseña no se carga por seguridad, el admin debe escribir una nueva si desea editarla
+                    cmbNewRol.setSelectedItem(modelo.getValueAt(fila, 2).toString());
+
+                    // Desactivamos el campo usuario si no quieres que cambien el username (que es único)
+                    txtNewUser.setEditable(false);
+                }
+            }
+        });
+
         //Botón Guardar Usuario
         btnGuardarUser.addActionListener(e -> guardarUsuario());
 
@@ -248,7 +270,10 @@ public class AdminView extends JFrame {
         btnEliminarUser.addActionListener(e -> eliminarUsuario());
 
         //Botón Limpiar Usuario
-        btnLimpiarUser.addActionListener(e -> limpiarUsuario());
+        btnLimpiarUser.addActionListener(e -> {
+            limpiarUsuario();
+            txtNewUser.setEditable(true); // Reactivamos al limpiar
+        });
 
         // Botón Generar Reporte
         btnGenerarReporte.addActionListener(e -> generarReporteUsuarios());
@@ -258,19 +283,152 @@ public class AdminView extends JFrame {
 
     }
 
+    private void cargarTabla() {
+        modelo.setRowCount(0); // Limpiar tabla actual
+        UsuarioDAO dao = new UsuarioDAO();
+        java.util.List<Usuario> lista = dao.listar();
+        for (Usuario u : lista) {
+            modelo.addRow(new Object[]{
+                    u.getUsername(),
+                    "********", // Por seguridad no mostramos la clave real
+                    u.getRol()
+            });
+        }
+    }
+
     private void guardarUsuario() {
+        String user = txtNewUser.getText().trim();
+        String pass = txtNewPass.getText().trim();
+        String rol = cmbNewRol.getSelectedItem().toString();
+
+        if (user.isEmpty() || pass.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Llene todos los campos", "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        Usuario nuevo = new Usuario();
+        nuevo.setUsername(user);
+        nuevo.setPassword(pass);
+        nuevo.setRol(rol);
+        nuevo.setActivo(true);
+
+        try {
+            UsuarioDAO dao = new UsuarioDAO();
+            dao.guardar(nuevo);
+            JOptionPane.showMessageDialog(this, "Usuario guardado exitosamente");
+            limpiarUsuario();
+            cargarTabla(); // Refresca la tabla automáticamente
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, "Error al guardar: " + e.getMessage());
+        }
     }
 
     private void editarUsuario() {
+        String user = txtNewUser.getText().trim();
+        String pass = txtNewPass.getText().trim();
+        String rol = cmbNewRol.getSelectedItem().toString();
+
+        if (user.isEmpty() || pass.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Para editar, seleccione un usuario y escriba la nueva contraseña");
+            return;
+        }
+
+        try {
+            UsuarioDAO dao = new UsuarioDAO();
+            // Buscamos el usuario en la BD (puedes añadir un método buscarPorNombre en tu DAO)
+            Usuario existente = dao.listar().stream()
+                    .filter(u -> u.getUsername().equals(user))
+                    .findFirst().orElse(null);
+
+            if (existente != null) {
+                existente.setPassword(pass);
+                existente.setRol(rol);
+
+                // Reutilizamos el método guardar (em.merge o em.persist según tu implementación)
+                // Si tu DAO usa persist(), asegúrate de que el objeto esté gestionado o usa merge.
+                dao.guardar(existente);
+
+                JOptionPane.showMessageDialog(this, "Usuario actualizado correctamente");
+                cargarTabla();
+                limpiarUsuario();
+                txtNewUser.setEditable(true);
+            }
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, "Error al editar: " + e.getMessage());
+        }
     }
 
     private void eliminarUsuario() {
+        int fila = tblUsers.getSelectedRow();
+        if (fila == -1) {
+            JOptionPane.showMessageDialog(this, "Seleccione un usuario de la tabla para eliminar");
+            return;
+        }
+
+        String user = modelo.getValueAt(fila, 0).toString();
+        int confirmar = JOptionPane.showConfirmDialog(this,
+                "¿Está seguro de eliminar al usuario " + user + "?",
+                "Confirmar eliminación", JOptionPane.YES_NO_OPTION);
+
+        if (confirmar == JOptionPane.YES_OPTION) {
+            try {
+                UsuarioDAO dao = new UsuarioDAO();
+                Usuario existente = dao.listar().stream()
+                        .filter(u -> u.getUsername().equals(user))
+                        .findFirst().orElse(null);
+
+                if (existente != null) {
+                    dao.eliminar(existente.getId());
+                    JOptionPane.showMessageDialog(this, "Usuario eliminado correctamente");
+                    cargarTabla();
+                    limpiarUsuario();
+                    txtNewUser.setEditable(true);
+                }
+            } catch (Exception e) {
+                JOptionPane.showMessageDialog(this, "Error al eliminar: " + e.getMessage());
+            }
+        }
     }
 
     private void limpiarUsuario() {
+        txtNewUser.setText("");
+        txtNewPass.setText("");
+        cmbNewRol.setSelectedIndex(0);
     }
 
     private void generarReporteUsuarios() {
+        JFileChooser chooser = new JFileChooser();
+        chooser.setDialogTitle("Guardar Reporte de Usuarios");
+        chooser.setSelectedFile(new java.io.File("Reporte_Usuarios_ANT.pdf"));
+
+        if (chooser.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) {
+            String ruta = chooser.getSelectedFile().getAbsolutePath();
+
+            // Asegurar extensión .pdf
+            if (!ruta.toLowerCase().endsWith(".pdf")) {
+                ruta += ".pdf";
+            }
+
+            try {
+                // Obtener lista actualizada desde el DAO
+                ec.edu.sistemalicencias.dao.UsuarioDAO dao = new ec.edu.sistemalicencias.dao.UsuarioDAO();
+                java.util.List<ec.edu.sistemalicencias.model.entities.Usuario> lista = dao.listar();
+
+                // Llamar al generador
+                ec.edu.sistemalicencias.util.PDFGenerator.generarReporteUsuariosPDF(lista, ruta);
+
+                JOptionPane.showMessageDialog(this, "Reporte generado con éxito en:\n" + ruta,
+                        "Éxito", JOptionPane.INFORMATION_MESSAGE);
+
+                // Opcional: Abrir el PDF automáticamente
+                java.awt.Desktop.getDesktop().open(new java.io.File(ruta));
+
+            } catch (Exception e) {
+                JOptionPane.showMessageDialog(this, "Error al generar el PDF: " + e.getMessage(),
+                        "Error", JOptionPane.ERROR_MESSAGE);
+                e.printStackTrace();
+            }
+        }
     }
 
     private void salirAplicacion() {
@@ -430,4 +588,5 @@ public class AdminView extends JFrame {
         Font fontWithFallback = isMac ? new Font(font.getFamily(), font.getStyle(), font.getSize()) : new StyleContext().getFont(font.getFamily(), font.getStyle(), font.getSize());
         return fontWithFallback instanceof FontUIResource ? fontWithFallback : new FontUIResource(fontWithFallback);
     }
+
 }
