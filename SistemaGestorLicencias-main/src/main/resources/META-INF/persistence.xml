@@ -7,6 +7,7 @@
 
     <persistence-unit name="LicenciasPU">
 
+
         <provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
 
         <!-- ENTIDADES -->

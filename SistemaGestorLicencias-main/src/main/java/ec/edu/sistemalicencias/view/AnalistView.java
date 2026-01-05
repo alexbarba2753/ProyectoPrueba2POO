@@ -3,9 +3,11 @@ package ec.edu.sistemalicencias.view;
 import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
 import ec.edu.sistemalicencias.controller.LicenciaController;
+import ec.edu.sistemalicencias.dao.UsuarioDAO;
 import ec.edu.sistemalicencias.model.entities.Conductor;
 import ec.edu.sistemalicencias.model.entities.Licencia;
 import ec.edu.sistemalicencias.model.entities.PruebaPsicometrica;
+import ec.edu.sistemalicencias.model.entities.Usuario;
 import ec.edu.sistemalicencias.model.exceptions.LicenciaException;
 import ec.edu.sistemalicencias.util.PDFGenerator;
 
@@ -387,7 +389,7 @@ public class AnalistView extends JFrame {
     private void generarReporteUsuarios() {
         JFileChooser chooser = new JFileChooser();
         chooser.setDialogTitle("Guardar Reporte de Usuarios");
-        chooser.setSelectedFile(new java.io.File("Reporte_Usuarios_ANT.pdf"));
+        chooser.setSelectedFile(new File("Reporte_Usuarios_ANT.pdf"));
 
         if (chooser.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) {
             String ruta = chooser.getSelectedFile().getAbsolutePath();
@@ -399,17 +401,17 @@ public class AnalistView extends JFrame {
 
             try {
                 // Obtener lista actualizada desde el DAO
-                ec.edu.sistemalicencias.dao.UsuarioDAO dao = new ec.edu.sistemalicencias.dao.UsuarioDAO();
-                java.util.List<ec.edu.sistemalicencias.model.entities.Usuario> lista = dao.listar();
+                UsuarioDAO dao = new UsuarioDAO();
+                List<Usuario> lista = dao.listar();
 
                 // Llamar al generador
-                ec.edu.sistemalicencias.util.PDFGenerator.generarReporteUsuariosPDF(lista, ruta);
+                PDFGenerator.generarReporteUsuariosPDF(lista, ruta);
 
                 JOptionPane.showMessageDialog(this, "Reporte generado con éxito en:\n" + ruta,
                         "Éxito", JOptionPane.INFORMATION_MESSAGE);
 
                 // Opcional: Abrir el PDF automáticamente
-                java.awt.Desktop.getDesktop().open(new java.io.File(ruta));
+                Desktop.getDesktop().open(new File(ruta));
 
             } catch (Exception e) {
                 JOptionPane.showMessageDialog(this, "Error al generar el PDF: " + e.getMessage(),

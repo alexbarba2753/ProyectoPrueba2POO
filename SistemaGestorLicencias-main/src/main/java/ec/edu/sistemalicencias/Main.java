@@ -74,12 +74,17 @@ public class Main {
                 null,
                 "SISTEMA DE LICENCIAS DE CONDUCIR - ECUADOR\n\n" +
                         "Agencia Nacional de Tránsito\n" +
-                        "Versión 1.0\n\n" +
+                        "Versión 2.0\n\n" +
                         "Desarrollado con:\n" +
                         "- Java 21\n" +
                         "- MySQL Database\n" +
                         "- Arquitectura MVC\n" +
-                        "- iText PDF\n\n" +
+                        "- iText PDF\n" +
+                        "- PostGresQSL\n" +
+                        "- Hibernate JPA\n" +
+                        "- Supabase\n" +
+                        "- Java Swing\n\n" +
+
                         "Iniciando sistema...",
                 "Bienvenido",
                 JOptionPane.INFORMATION_MESSAGE
