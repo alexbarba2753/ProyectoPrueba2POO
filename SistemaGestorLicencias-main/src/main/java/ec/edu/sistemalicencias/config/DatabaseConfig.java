@@ -29,11 +29,19 @@ public class DatabaseConfig {
      * Carga los parámetros de conexión desde configuración
      */
     private DatabaseConfig() {
-        // Configuración por defecto - puede ser sobreescrita mediante properties
+        // Configuración para Postgres en la Nube- Supabase
+        this.driver = "org.postgresql.Driver";
+        this.url = "jdbc:postgresql://aws-1-us-east-2.pooler.supabase.com:6543/postgres?sslmode=require";
+        this.usuario = "postgres.kuoxpfkrxrkcyudfyupf";
+        this.password = "0962050585ale";
+
+        /*
+        // Configuración para MySQL local
         this.driver = "com.mysql.cj.jdbc.Driver";
         this.url = "jdbc:mysql://localhost:3306/sistema_licencias?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true";
         this.usuario = "root";
         this.password = "123456";
+         */
 
         try {
             // Cargar el driver JDBC
@@ -115,3 +123,6 @@ public class DatabaseConfig {
         return driver;
     }
 }
+
+
+
