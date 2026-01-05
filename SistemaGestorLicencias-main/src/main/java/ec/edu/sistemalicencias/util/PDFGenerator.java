@@ -351,7 +351,7 @@ public class PDFGenerator {
 
         documento.add(tabla);
 
-        // Agregar pie de página (reutilizando tu lógica existente)
+        // Agregar pie de página
         agregarPiePagina(documento);
 
         documento.close();

@@ -5,14 +5,10 @@ import com.intellij.uiDesigner.core.GridLayoutManager;
 import ec.edu.sistemalicencias.controller.LicenciaController;
 import ec.edu.sistemalicencias.dao.UsuarioDAO;
 import ec.edu.sistemalicencias.model.entities.Usuario;
-import ec.edu.sistemalicencias.model.exceptions.BaseDatosException;
-
-
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
 import javax.swing.border.TitledBorder;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 
 public class LoginView extends JFrame {
 
@@ -25,39 +21,138 @@ public class LoginView extends JFrame {
     public LoginView(LicenciaController controller) {
         this.controller = controller;
 
-        setContentPane(PanelPrincipal);
+        // Configuración de la ventana
+        setTitle("SISTEMA DE LICENCIAS - ACCESO");
         setDefaultCloseOperation(EXIT_ON_CLOSE);
-        setSize(1200, 645);
+        setSize(900, 550); // Tamaño más balanceado
         setLocationRelativeTo(null);
-        setTitle("Inicio de Sesion");
         setResizable(false);
 
+        inicializarComponentesManual();
         cargarUsuarios();
+        configurarEventos();
+    }
 
-        BtnLimpiar.addActionListener(e -> txtPassword.setText(""));
+    private void inicializarComponentesManual() {
+        // Panel Principal con imagen de fondo o color sólido elegante
+        PanelPrincipal = new JPanel(new BorderLayout());
+        PanelPrincipal.setBackground(new Color(245, 247, 250));
 
-        BtnIngreso.addActionListener(e -> {
+        // --- PARTE IZQUIERDA: IMAGEN/LOGO ---
+        // Usaremos un panel con la imagen de la EPN o el logo de la ANT
+        JPanel panelLateral = new JPanel(new BorderLayout());
+        panelLateral.setPreferredSize(new Dimension(600, 0));
+        panelLateral.setBackground(new Color(40, 60, 100)); // Azul institucional
 
-            Usuario u = (Usuario) cmbUser.getSelectedItem();
-            String pass = new String(txtPassword.getPassword());
+        JLabel lblImagen = new JLabel();
+        lblImagen.setHorizontalAlignment(JLabel.CENTER);
+        // Intentar cargar la imagen login.png, si no, poner un texto
+        try {
+            ImageIcon icon = new ImageIcon(getClass().getResource("/imagenes/login.png"));
+            // Redimensionar imagen si es necesario
+            Image img = icon.getImage().getScaledInstance(600, 600, Image.SCALE_SMOOTH);
+            lblImagen.setIcon(new ImageIcon(img));
+        } catch (Exception e) {
+            lblImagen.setText("SISTEMA ANT");
+            lblImagen.setForeground(Color.WHITE);
+            lblImagen.setFont(new Font("Arial", Font.BOLD, 30));
+        }
+        panelLateral.add(lblImagen);
 
-            Usuario validado = controller.login(u.getUsername(), pass);
+        // --- PARTE DERECHA: FORMULARIO ---
+        JPanel panelDerecho = new JPanel(new GridBagLayout());
+        panelDerecho.setBackground(Color.WHITE);
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(10, 40, 10, 40);
+        gbc.fill = GridBagConstraints.HORIZONTAL;
 
-            if (validado == null) {
-                JOptionPane.showMessageDialog(
-                        this,
-                        "Contraseña incorrecta",
-                        "Error de inicio de sesión",
-                        JOptionPane.ERROR_MESSAGE
-                );
-                return;
-            }
+        // Icono de Usuario (Avatar)
+        JLabel lblAvatar = new JLabel();
+        try {
+            ImageIcon iconAvatar = new ImageIcon(getClass().getResource("/imagenes/icono.png"));
+            Image imgAvatar = iconAvatar.getImage().getScaledInstance(100, 100, Image.SCALE_SMOOTH);
+            lblAvatar.setIcon(new ImageIcon(imgAvatar));
+        } catch (Exception e) {
+        }
+        lblAvatar.setHorizontalAlignment(JLabel.CENTER);
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        gbc.gridwidth = 2;
+        panelDerecho.add(lblAvatar, gbc);
 
-            dispose();
-            controller.abrirVistaSegunUsuario(validado);
-        });
+        // Título
+        JLabel lblLogin = new JLabel("INICIAR SESIÓN");
+        lblLogin.setFont(new Font("Arial", Font.BOLD, 24));
+        lblLogin.setForeground(new Color(40, 60, 100));
+        lblLogin.setHorizontalAlignment(JLabel.CENTER);
+        gbc.gridy = 1;
+        panelDerecho.add(lblLogin, gbc);
 
+        // Separador
+        gbc.gridy = 2;
+        gbc.insets = new Insets(0, 40, 20, 40);
+        panelDerecho.add(new JSeparator(), gbc);
 
+        // Campos
+        gbc.insets = new Insets(5, 40, 5, 40);
+        gbc.gridwidth = 2;
+
+        JLabel l1 = new JLabel("Usuario:");
+        l1.setFont(new Font("Arial", Font.BOLD, 14));
+        gbc.gridy = 3;
+        panelDerecho.add(l1, gbc);
+
+        cmbUser = new JComboBox<>();
+        cmbUser.setFont(new Font("Arial", Font.PLAIN, 14));
+        cmbUser.setPreferredSize(new Dimension(0, 35));
+        gbc.gridy = 4;
+        panelDerecho.add(cmbUser, gbc);
+
+        JLabel l2 = new JLabel("Contraseña:");
+        l2.setFont(new Font("Arial", Font.BOLD, 14));
+        gbc.gridy = 5;
+        panelDerecho.add(l2, gbc);
+
+        txtPassword = new JPasswordField();
+        txtPassword.setPreferredSize(new Dimension(0, 35));
+        gbc.gridy = 6;
+        panelDerecho.add(txtPassword, gbc);
+
+        // Botones
+        JPanel panelBotones = new JPanel(new GridLayout(1, 2, 10, 0));
+        panelBotones.setBackground(Color.WHITE);
+
+        BtnIngreso = new JButton("INGRESAR");
+        BtnIngreso.setForeground(Color.BLUE);
+        BtnIngreso.setFont(new Font("Arial", Font.BOLD, 12));
+        BtnIngreso.setFocusPainted(false);
+        BtnIngreso.setCursor(new Cursor(Cursor.HAND_CURSOR));
+
+        BtnLimpiar = new JButton("LIMPIAR");
+        BtnLimpiar.setFont(new Font("Arial", Font.BOLD, 12));
+        BtnLimpiar.setFocusPainted(false);
+        BtnLimpiar.setCursor(new Cursor(Cursor.HAND_CURSOR));
+
+        panelBotones.add(BtnLimpiar);
+        panelBotones.add(BtnIngreso);
+
+        gbc.gridy = 7;
+        gbc.insets = new Insets(30, 40, 10, 40);
+        panelDerecho.add(panelBotones, gbc);
+
+        // Pie
+        JLabel lblCopy = new JLabel("© 2026 Agencia Nacional de Tránsito - v2.0");
+        lblCopy.setFont(new Font("Arial", Font.PLAIN, 10));
+        lblCopy.setForeground(Color.GRAY);
+        lblCopy.setHorizontalAlignment(JLabel.CENTER);
+        gbc.gridy = 8;
+        panelDerecho.add(lblCopy, gbc);
+
+        // Ensamblaje
+        PanelPrincipal.add(panelLateral, BorderLayout.WEST);
+        PanelPrincipal.add(panelDerecho, BorderLayout.CENTER);
+
+        setContentPane(PanelPrincipal);
     }
 
     private void cargarUsuarios() {
@@ -65,6 +160,27 @@ public class LoginView extends JFrame {
         for (Usuario u : dao.listar()) {
             cmbUser.addItem(u);
         }
+    }
+
+    private void configurarEventos() {
+        BtnLimpiar.addActionListener(e -> txtPassword.setText(""));
+
+        BtnIngreso.addActionListener(e -> {
+            if (cmbUser.getSelectedItem() == null) return;
+
+            Usuario u = (Usuario) cmbUser.getSelectedItem();
+            String pass = new String(txtPassword.getPassword());
+
+            Usuario validado = controller.login(u.getUsername(), pass);
+
+            if (validado == null) {
+                JOptionPane.showMessageDialog(this, "Contraseña incorrecta", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            dispose();
+            controller.abrirVistaSegunUsuario(validado);
+        });
     }
 
 

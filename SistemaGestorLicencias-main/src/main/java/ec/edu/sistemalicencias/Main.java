@@ -43,26 +43,11 @@ public class Main {
                 return;
             }
 
-
-            //AdminView adminView = new AdminView(new LicenciaController());
-            //adminView.setVisible(true);
-
+            // Iniciar vista de login
             LoginView loginView = new LoginView(new LicenciaController());
             loginView.setVisible(true);
-/*
-            // Iniciar ventana principal
-            LicenciaController controller = new LicenciaController();
-            AnalistTestView analistView = new AnalistTestView(controller);
-            analistView.setVisible(false);
 
-            
-            AnalistView mainView = new AnalistView(controller);
-            mainView.setVisible(false);
-*/
         });
-
-
-
     }
 
     /**
@@ -77,13 +62,13 @@ public class Main {
                         "Versión 2.0\n\n" +
                         "Desarrollado con:\n" +
                         "- Java 21\n" +
-                        "- MySQL Database\n" +
+                        "- MySQL Database y PostgreSQL\n" +
                         "- Arquitectura MVC\n" +
+                        "- Java Swing\n" +
                         "- iText PDF\n" +
-                        "- PostGresQSL\n" +
                         "- Hibernate JPA\n" +
-                        "- Supabase\n" +
-                        "- Java Swing\n\n" +
+                        "- Supabase\n\n" +
+
 
                         "Iniciando sistema...",
                 "Bienvenido",

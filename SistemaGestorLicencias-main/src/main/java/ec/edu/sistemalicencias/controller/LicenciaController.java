@@ -328,11 +328,11 @@ public class LicenciaController {
 
 
     public void abrirVistaSegunUsuario(Usuario u){
-
         if(u.getRol().equalsIgnoreCase("ADMIN")){
-            new AdminView(this).setVisible(true); // crud usuarios
-        }else if (u.getRol().equalsIgnoreCase("ANALISTA")){
-            new AnalistView(this).setVisible(true); // sistema licencias
+            new AdminView(this).setVisible(true);
+        } else if (u.getRol().equalsIgnoreCase("ANALISTA")){
+            // IMPORTANTE: Pasar 'u' como segundo parámetro
+            new AnalistView(this, u).setVisible(true);
         }
     }
 
