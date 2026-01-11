@@ -3,7 +3,7 @@ package ec.edu.sistemalicencias.view;
 import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
 import ec.edu.sistemalicencias.controller.LicenciaController;
-import ec.edu.sistemalicencias.dao.UsuarioDAO;
+import ec.edu.sistemalicencias.controller.UsuarioController;
 import ec.edu.sistemalicencias.model.entities.Conductor;
 import ec.edu.sistemalicencias.model.entities.Licencia;
 import ec.edu.sistemalicencias.model.entities.PruebaPsicometrica;
@@ -32,7 +32,6 @@ public class AnalistView extends JFrame {
 
     // Controlador del sistema
     private final LicenciaController controller;
-    private final Usuario usuarioLogueado; // Variable para guardar el usuario
 
     // Componentes de la interfaz
     private JPanel mainPanel;
@@ -43,20 +42,15 @@ public class AnalistView extends JFrame {
     private JButton btnConsultarLicencias;
     private JButton btnGenerarDocumento;
     private JButton btnSalir;
-    private JButton btnGenerarReportes;
-    private JLabel lblUserSesion; // Nueva etiqueta para el usuario
+    private JLabel lblUserSesion;
 
     /**
      * Constructor de la vista principal
      */
     public AnalistView(LicenciaController controller, Usuario usuario) {
         this.controller = controller;
-        this.usuarioLogueado = usuario;
-
-        $$$setupUI$$$();
 
         inicializarComponentes();
-
         insertarEtiquetaUsuario(usuario);
 
         setTitle("Sistema de Licencias de Conducir - Ecuador");
@@ -123,7 +117,6 @@ public class AnalistView extends JFrame {
         btnEmitirLicencia = crearBoton("Emitir Licencia");
         btnConsultarLicencias = crearBoton("Consultar Licencias");
         btnGenerarDocumento = crearBoton("Generar Documento PDF");
-        btnGenerarReportes = crearBoton("Generar Reportes de Usuarios");
         btnSalir = crearBoton("Cerrar Sesión");
 
         // Agregar botones al panel
@@ -133,9 +126,8 @@ public class AnalistView extends JFrame {
         panelModulos.add(btnEmitirLicencia);
         panelModulos.add(btnConsultarLicencias);
         panelModulos.add(btnGenerarDocumento);
-        panelModulos.add(btnGenerarReportes);
         panelModulos.add(btnSalir);
-        //panelModulos.add(new JLabel()); // Celda vacía para balancear
+        panelModulos.add(new JLabel()); // Celda vacía para balancear
 
         // === Panel de Pie de Página ===
         JPanel panelPie = new JPanel();
@@ -188,9 +180,6 @@ public class AnalistView extends JFrame {
         // Botón Generar Documento PDF
         btnGenerarDocumento.addActionListener(e -> generarDocumentoPDF());
 
-        // Botón Generar Reportes de Usuarios
-        btnGenerarReportes.addActionListener(e -> generarReporteUsuarios());
-
         // Botón Salir
         btnSalir.addActionListener(e -> salirAplicacion());
     }
@@ -212,7 +201,6 @@ public class AnalistView extends JFrame {
         btnEmitirLicencia.setCursor(new Cursor(Cursor.HAND_CURSOR));
         btnConsultarLicencias.setCursor(new Cursor(Cursor.HAND_CURSOR));
         btnGenerarDocumento.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        btnGenerarReportes.setCursor(new Cursor(Cursor.HAND_CURSOR));
         btnSalir.setCursor(new Cursor(Cursor.HAND_CURSOR));
     }
 
@@ -357,24 +345,12 @@ public class AnalistView extends JFrame {
      * Cierra sesión y vuelve al login
      */
     private void salirAplicacion() {
-
-        int opcion = JOptionPane.showConfirmDialog(
-                this,
-                "¿Desea cerrar sesión?",
-                "Cerrar sesión",
-                JOptionPane.YES_NO_OPTION,
-                JOptionPane.QUESTION_MESSAGE
-        );
+        int opcion = JOptionPane.showConfirmDialog(this, "¿Cerrar sesión?", "Salir", JOptionPane.YES_NO_OPTION);
 
         if (opcion == JOptionPane.YES_OPTION) {
-
-            // Cierra esta ventana
             this.dispose();
 
-            // Regresa al login
-            new LoginView(
-                    new LicenciaController()
-            ).setVisible(true);
+            new LoginView(new UsuarioController()).setVisible(true);
         }
     }
 
@@ -394,61 +370,16 @@ public class AnalistView extends JFrame {
     }
 
 
-    private void generarReporteUsuarios() {
-        JFileChooser chooser = new JFileChooser();
-        chooser.setDialogTitle("Guardar Reporte de Usuarios");
-        chooser.setSelectedFile(new File("Reporte_Usuarios_ANT.pdf"));
-
-        if (chooser.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) {
-            String ruta = chooser.getSelectedFile().getAbsolutePath();
-
-            // Asegurar extensión .pdf
-            if (!ruta.toLowerCase().endsWith(".pdf")) {
-                ruta += ".pdf";
-            }
-
-            try {
-                // Obtener lista actualizada desde el DAO
-                UsuarioDAO dao = new UsuarioDAO();
-                List<Usuario> lista = dao.listar();
-
-                // Llamar al generador
-                PDFGenerator.generarReporteUsuariosPDF(lista, ruta);
-
-                JOptionPane.showMessageDialog(this, "Reporte generado con éxito en:\n" + ruta,
-                        "Éxito", JOptionPane.INFORMATION_MESSAGE);
-
-                // Opcional: Abrir el PDF automáticamente
-                Desktop.getDesktop().open(new File(ruta));
-
-            } catch (Exception e) {
-                JOptionPane.showMessageDialog(this, "Error al generar el PDF: " + e.getMessage(),
-                        "Error", JOptionPane.ERROR_MESSAGE);
-                e.printStackTrace();
-            }
-        }
-    }
-
-
     private void insertarEtiquetaUsuario(Usuario u) {
-        // Crear la etiqueta con estilo
-        lblUserSesion = new JLabel("Usuario: " + u.getUsername());
-        lblUserSesion.setFont(new Font("Arial", Font.ITALIC, 13));
-        lblUserSesion.setForeground(new Color(40, 60, 100));
-        lblUserSesion.setHorizontalAlignment(SwingConstants.RIGHT);
+        lblUserSesion = new JLabel("Sesión activa: " + u.getNombreCompleto() + " (" + u.getRol() + ")");
+        lblUserSesion.setFont(new Font("Arial", Font.ITALIC, 12));
+        JPanel p = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        p.add(lblUserSesion);
 
-        // Crear un panel contenedor pequeño para la sesión
-        JPanel panelSesion = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-        panelSesion.setOpaque(false); // Para que no tape el fondo
-        panelSesion.add(lblUserSesion);
-
-        // Insertar al inicio del mainPanel (BorderLayout.NORTH)
-        // Nota: Como tu encabezado ya está en el NORTH, vamos a ponerlo dentro de él
-        // buscando el primer componente del mainPanel.
         if (mainPanel.getLayout() instanceof BorderLayout) {
             Component c = ((BorderLayout) mainPanel.getLayout()).getLayoutComponent(BorderLayout.NORTH);
             if (c instanceof JPanel) {
-                ((JPanel) c).add(panelSesion, 0); // Lo pone en la posición 0 (arriba de todo)
+                ((JPanel) c).add(p, 0);
                 ((JPanel) c).revalidate();
             }
         }
@@ -469,6 +400,13 @@ public class AnalistView extends JFrame {
         );
     }
 
+
+    {
+// GUI initializer generated by IntelliJ IDEA GUI Designer
+// >>> IMPORTANT!! <<<
+// DO NOT EDIT OR ADD ANY CODE HERE!
+        $$$setupUI$$$();
+    }
 
     /**
      * Method generated by IntelliJ IDEA GUI Designer
@@ -537,11 +475,6 @@ public class AnalistView extends JFrame {
         btnSalir.setForeground(new Color(-1));
         btnSalir.setText("Cerrar Sesión");
         panel2.add(btnSalir, new GridConstraints(3, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(50, 50), null, 0, false));
-        btnGenerarReportes = new JButton();
-        Font btnGenerarReportesFont = this.$$$getFont$$$("Arial", -1, 14, btnGenerarReportes.getFont());
-        if (btnGenerarReportesFont != null) btnGenerarReportes.setFont(btnGenerarReportesFont);
-        btnGenerarReportes.setText("Generar Reportes de Usuarios");
-        panel2.add(btnGenerarReportes, new GridConstraints(3, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(150, 80), null, 0, false));
         final JPanel panel3 = new JPanel();
         panel3.setLayout(new GridLayoutManager(1, 1, new Insets(10, 0, 0, 0), -1, -1));
         mainPanel.add(panel3, new GridConstraints(3, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, 1, null, null, null, 0, false));
@@ -584,5 +517,4 @@ public class AnalistView extends JFrame {
     public JComponent $$$getRootComponent$$$() {
         return mainPanel;
     }
-
 }

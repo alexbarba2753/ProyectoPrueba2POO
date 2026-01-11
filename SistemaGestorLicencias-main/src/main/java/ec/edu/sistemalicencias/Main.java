@@ -1,9 +1,8 @@
 
 package ec.edu.sistemalicencias;
 
-import ec.edu.sistemalicencias.controller.LicenciaController;
 import ec.edu.sistemalicencias.config.DatabaseConfig;
-import ec.edu.sistemalicencias.view.AdminView;
+import ec.edu.sistemalicencias.controller.UsuarioController;
 import ec.edu.sistemalicencias.view.LoginView;
 
 import javax.swing.*;
@@ -43,10 +42,11 @@ public class Main {
                 return;
             }
 
-            // Iniciar vista de login
-            LoginView loginView = new LoginView(new LicenciaController());
-            loginView.setVisible(true);
+            // Iniciamos el controlador de usuarios
+            UsuarioController controller = new UsuarioController();
 
+            // Abrimos el login como ventana inicial única
+            new LoginView(controller).setVisible(true);
         });
     }
 
@@ -62,11 +62,11 @@ public class Main {
                         "Versión 2.0\n\n" +
                         "Desarrollado con:\n" +
                         "- Java 21\n" +
-                        "- MySQL Database y PostgreSQL\n" +
+                        "- PostgreSQL\n" +
                         "- Arquitectura MVC\n" +
+                        "- Arquitectura JDBC\n" +
                         "- Java Swing\n" +
                         "- iText PDF\n" +
-                        "- Hibernate JPA\n" +
                         "- Supabase\n\n" +
 
 

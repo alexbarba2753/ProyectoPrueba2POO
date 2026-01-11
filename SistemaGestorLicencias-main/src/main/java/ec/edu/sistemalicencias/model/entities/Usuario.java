@@ -1,34 +1,35 @@
 package ec.edu.sistemalicencias.model.entities;
 
 import java.io.Serializable;
-import javax.persistence.*;
-/*import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;*/
+import java.time.LocalDateTime;
 
-
-@Entity
-@Table(name = "usuarios")
+/**
+ * Clase Entidad Usuario (POJO)
+ * Representa la tabla 'usuarios' de la base de datos.
+ */
 public class Usuario implements Serializable {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
-    @Column(name="username", unique = true, nullable = false)
     private String username;
-
-    @Column(name="password", nullable = false)
     private String password;
-
-    @Column(name="rol", nullable = false)
-    private String rol; // ADMIN o ANALISTA
-
+    private String rol;
+    private String nombreCompleto;
+    private String email;
     private boolean activo = true;
+    private java.time.LocalDateTime createdAt;
 
-    @Override
-    public String toString() {
-        return username;
+    // 1. Constructor vacío
+    public Usuario() {
     }
+
+    // 2. Constructor útil para el Login o para crear nuevos usuarios rápido
+    public Usuario(String username, String password, String rol) {
+        this.username = username;
+        this.password = password;
+        this.rol = rol;
+        this.activo = true;
+    }
+
 
     public Long getId() {
         return id;
@@ -68,5 +69,38 @@ public class Usuario implements Serializable {
 
     public void setActivo(boolean activo) {
         this.activo = activo;
+    }
+
+    public String getNombreCompleto() {
+        return nombreCompleto;
+    }
+
+    public void setNombreCompleto(String nombreCompleto) {
+        this.nombreCompleto = nombreCompleto;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public java.time.LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(java.time.LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    @Override
+    public String toString() {
+        return "Usuario{" +
+                "id=" + id +
+                ", username='" + username + '\'' +
+                ", rol='" + rol + '\'' +
+                '}';
     }
 }

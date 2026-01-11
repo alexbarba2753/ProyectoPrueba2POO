@@ -1,35 +1,33 @@
 package ec.edu.sistemalicencias.view;
 
+import ec.edu.sistemalicencias.controller.UsuarioController;
+
+import javax.swing.*;
+import java.awt.*;
+
 import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
-import ec.edu.sistemalicencias.controller.LicenciaController;
-import ec.edu.sistemalicencias.dao.UsuarioDAO;
-import ec.edu.sistemalicencias.model.entities.Usuario;
-import javax.swing.*;
-import javax.swing.border.EmptyBorder;
+
 import javax.swing.border.TitledBorder;
-import java.awt.*;
 
 public class LoginView extends JFrame {
 
-    private final LicenciaController controller;
-    private JComboBox<Usuario> cmbUser;
+    private final UsuarioController controller;
+    private JTextField txtUsername;
     private JPasswordField txtPassword;
     private JButton BtnIngreso, BtnLimpiar;
     private JPanel PanelPrincipal;
 
-    public LoginView(LicenciaController controller) {
+    public LoginView(UsuarioController controller) {
         this.controller = controller;
 
-        // Configuración de la ventana
         setTitle("SISTEMA DE LICENCIAS - ACCESO");
         setDefaultCloseOperation(EXIT_ON_CLOSE);
-        setSize(900, 550); // Tamaño más balanceado
+        setSize(900, 550);
         setLocationRelativeTo(null);
         setResizable(false);
 
         inicializarComponentesManual();
-        cargarUsuarios();
         configurarEventos();
     }
 
@@ -39,17 +37,15 @@ public class LoginView extends JFrame {
         PanelPrincipal.setBackground(new Color(245, 247, 250));
 
         // --- PARTE IZQUIERDA: IMAGEN/LOGO ---
-        // Usaremos un panel con la imagen de la EPN o el logo de la ANT
+        // Usamos un panel con la imagen de la EPN
         JPanel panelLateral = new JPanel(new BorderLayout());
         panelLateral.setPreferredSize(new Dimension(600, 0));
         panelLateral.setBackground(new Color(40, 60, 100)); // Azul institucional
 
         JLabel lblImagen = new JLabel();
         lblImagen.setHorizontalAlignment(JLabel.CENTER);
-        // Intentar cargar la imagen login.png, si no, poner un texto
         try {
             ImageIcon icon = new ImageIcon(getClass().getResource("/imagenes/login.png"));
-            // Redimensionar imagen si es necesario
             Image img = icon.getImage().getScaledInstance(600, 600, Image.SCALE_SMOOTH);
             lblImagen.setIcon(new ImageIcon(img));
         } catch (Exception e) {
@@ -99,14 +95,14 @@ public class LoginView extends JFrame {
 
         JLabel l1 = new JLabel("Usuario:");
         l1.setFont(new Font("Arial", Font.BOLD, 14));
-        gbc.gridy = 3;
-        panelDerecho.add(l1, gbc);
+        gbc.gridy = 3; // <-- Asegúrate de que no esté comentado
+        panelDerecho.add(l1, gbc); // Añadimos la etiqueta
 
-        cmbUser = new JComboBox<>();
-        cmbUser.setFont(new Font("Arial", Font.PLAIN, 14));
-        cmbUser.setPreferredSize(new Dimension(0, 35));
-        gbc.gridy = 4;
-        panelDerecho.add(cmbUser, gbc);
+        txtUsername = new JTextField();
+        txtUsername.setFont(new Font("Arial", Font.PLAIN, 14));
+        txtUsername.setPreferredSize(new Dimension(0, 35));
+        gbc.gridy = 4; // <-- Posición debajo de la etiqueta
+        panelDerecho.add(txtUsername, gbc); // !!! ESTA LÍNEA FALTABA: Añadimos el campo de texto
 
         JLabel l2 = new JLabel("Contraseña:");
         l2.setFont(new Font("Arial", Font.BOLD, 14));
@@ -155,31 +151,18 @@ public class LoginView extends JFrame {
         setContentPane(PanelPrincipal);
     }
 
-    private void cargarUsuarios() {
-        UsuarioDAO dao = new UsuarioDAO();
-        for (Usuario u : dao.listar()) {
-            cmbUser.addItem(u);
-        }
-    }
 
     private void configurarEventos() {
-        BtnLimpiar.addActionListener(e -> txtPassword.setText(""));
+        BtnLimpiar.addActionListener(e -> {
+            txtUsername.setText("");
+            txtPassword.setText("");
+        });
 
         BtnIngreso.addActionListener(e -> {
-            if (cmbUser.getSelectedItem() == null) return;
-
-            Usuario u = (Usuario) cmbUser.getSelectedItem();
+            String user = txtUsername.getText().trim();
             String pass = new String(txtPassword.getPassword());
 
-            Usuario validado = controller.login(u.getUsername(), pass);
-
-            if (validado == null) {
-                JOptionPane.showMessageDialog(this, "Contraseña incorrecta", "Error", JOptionPane.ERROR_MESSAGE);
-                return;
-            }
-
-            dispose();
-            controller.abrirVistaSegunUsuario(validado);
+            controller.procesarLogin(user, pass, this);
         });
     }
 
@@ -226,13 +209,11 @@ public class LoginView extends JFrame {
         panel3.add(BtnLimpiar, new GridConstraints(2, 0, 1, 2, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         txtPassword = new JPasswordField();
         panel3.add(txtPassword, new GridConstraints(1, 1, 1, 2, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(150, -1), null, 0, false));
-        cmbUser = new JComboBox();
-        final DefaultComboBoxModel defaultComboBoxModel1 = new DefaultComboBoxModel();
-        cmbUser.setModel(defaultComboBoxModel1);
-        panel3.add(cmbUser, new GridConstraints(0, 1, 1, 2, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         BtnIngreso = new JButton();
         BtnIngreso.setText("Iniciar Sesión");
         panel3.add(BtnIngreso, new GridConstraints(2, 2, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        txtUsername = new JTextField();
+        panel3.add(txtUsername, new GridConstraints(0, 1, 1, 2, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(150, -1), null, 0, false));
         final JPanel panel4 = new JPanel();
         panel4.setLayout(new GridLayoutManager(1, 1, new Insets(0, 0, 0, 0), -1, -1));
         PanelPrincipal.add(panel4, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));

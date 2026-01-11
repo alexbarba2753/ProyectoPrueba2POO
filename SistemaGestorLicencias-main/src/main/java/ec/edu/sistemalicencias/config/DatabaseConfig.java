@@ -11,7 +11,7 @@ import java.sql.SQLException;
  * Implementa el patrón Singleton para gestionar una única instancia de configuración.
  *
  * @author Sistema Licencias Ecuador
- * @version 1.0
+ * @version 2.0
  */
 public class DatabaseConfig {
 
@@ -34,15 +34,6 @@ public class DatabaseConfig {
         this.url = "jdbc:postgresql://aws-1-us-east-2.pooler.supabase.com:6543/postgres?sslmode=require";
         this.usuario = "postgres.kuoxpfkrxrkcyudfyupf";
         this.password = "0962050585ale";
-
-        /*
-        // Configuración para MySQL local
-        this.driver = "com.mysql.cj.jdbc.Driver";
-        this.url = "jdbc:mysql://localhost:3306/sistema_licencias?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true";
-        this.usuario = "root";
-        this.password = "123456";
-         */
-
 
         try {
             // Cargar el driver JDBC

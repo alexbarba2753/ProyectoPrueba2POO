@@ -1,17 +1,12 @@
 package ec.edu.sistemalicencias.controller;
 
 import com.itextpdf.text.DocumentException;
-import ec.edu.sistemalicencias.dao.UsuarioDAO;
 import ec.edu.sistemalicencias.model.entities.Conductor;
 import ec.edu.sistemalicencias.model.entities.Licencia;
 import ec.edu.sistemalicencias.model.entities.PruebaPsicometrica;
-import ec.edu.sistemalicencias.model.entities.Usuario;
 import ec.edu.sistemalicencias.model.exceptions.LicenciaException;
 import ec.edu.sistemalicencias.service.LicenciaService;
 import ec.edu.sistemalicencias.util.PDFGenerator;
-import ec.edu.sistemalicencias.view.AdminView;
-import ec.edu.sistemalicencias.view.AnalistTestView;
-import ec.edu.sistemalicencias.view.AnalistView;
 
 import javax.swing.*;
 import java.io.File;
@@ -314,32 +309,6 @@ public class LicenciaController {
 
         return respuesta == JOptionPane.YES_OPTION;
     }
-
-
-
-
-
-    // ===================== LOGIN / SEGURIDAD =====================
-
-
-    public Usuario login(String user, String pass){
-        return new UsuarioDAO().login(user, pass);
-    }
-
-
-    public void abrirVistaSegunUsuario(Usuario u){
-        if(u.getRol().equalsIgnoreCase("ADMIN")){
-            new AdminView(this).setVisible(true);
-        } else if (u.getRol().equalsIgnoreCase("ANALISTA")){
-            // IMPORTANTE: Pasar 'u' como segundo parámetro
-            new AnalistView(this, u).setVisible(true);
-        }
-    }
-
-
-
-
-
 
 
 }

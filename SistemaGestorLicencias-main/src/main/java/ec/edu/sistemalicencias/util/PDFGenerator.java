@@ -46,6 +46,7 @@ public class PDFGenerator {
 
         documento.open();
 
+
         // Agregar contenido al documento
         agregarEncabezado(documento);
         agregarDatosConductor(documento, conductor);
@@ -294,82 +295,94 @@ public class PDFGenerator {
     }
 
 
+
     /**
      * Genera un reporte PDF con el listado de todos los usuarios del sistema.
      */
     public static void generarReporteUsuariosPDF(java.util.List<ec.edu.sistemalicencias.model.entities.Usuario> usuarios, String rutaArchivo)
             throws DocumentException, IOException {
 
-        Document documento = new Document(PageSize.A4.rotate()); // Horizontal para que quepa mejor la tabla
+        // 1. Configuración del documento (Horizontal para mejor espacio)
+        Document documento = new Document(PageSize.A4.rotate());
         PdfWriter.getInstance(documento, new FileOutputStream(rutaArchivo));
 
         documento.open();
 
-        // --- ENCABEZADO PERSONALIZADO PARA REPORTES ---
-        Paragraph titulo = new Paragraph("AGENCIA NACIONAL DE TRÁNSITO", FONT_TITULO);
-        titulo.setAlignment(Element.ALIGN_CENTER);
-        documento.add(titulo);
+        // 2. Encabezado de la institución
+        Paragraph ant = new Paragraph("AGENCIA NACIONAL DE TRÁNSITO",
+                FontFactory.getFont(FontFactory.HELVETICA_BOLD, 18, new BaseColor(40, 60, 100)));
+        ant.setAlignment(Element.ALIGN_CENTER);
+        documento.add(ant);
 
-        Paragraph subtitulo = new Paragraph("REPORTE GENERAL DE USUARIOS DEL SISTEMA", FONT_SUBTITULO);
+        Paragraph subtitulo = new Paragraph("REPORTE DETALLADO DE USUARIOS Y ROLES",
+                FontFactory.getFont(FontFactory.HELVETICA_BOLD, 14, BaseColor.DARK_GRAY));
         subtitulo.setAlignment(Element.ALIGN_CENTER);
         subtitulo.setSpacingAfter(20);
         documento.add(subtitulo);
 
-        // --- TABLA DE USUARIOS ---
-        PdfPTable tabla = new PdfPTable(4); // Columnas: ID, Usuario, Rol, Estado
+        // 3. Tabla de Datos
+        PdfPTable tabla = new PdfPTable(6);
         tabla.setWidthPercentage(100);
-        tabla.setSpacingBefore(10);
+        // Anchos: ID(5%), Nombre(25%), User(15%), Rol(15%), Estado(15%), Fecha(25%)
+        tabla.setWidths(new float[]{5f, 25f, 15f, 15f, 15f, 25f});
 
-        // Configurar anchos (10%, 40%, 30%, 20%)
-        tabla.setWidths(new float[]{10f, 40f, 30f, 20f});
-
-        // Encabezados de tabla
-        String[] encabezados = {"ID", "NOMBRE DE USUARIO", "ROL ASIGNADO", "ESTADO"};
-        for (String encabezado : encabezados) {
-            PdfPCell cell = new PdfPCell(new Phrase(encabezado, FONT_CAMPO));
-            cell.setBackgroundColor(new BaseColor(40, 60, 100)); // Azul corporativo
+        // --- ENCABEZADOS DE TABLA ---
+        String[] titulos = {"ID", "NOMBRE COMPLETO", "USUARIO", "ROL", "ESTADO", "REGISTRO"};
+        for (String t : titulos) {
+            PdfPCell cell = new PdfPCell(new Phrase(t, FontFactory.getFont(FontFactory.HELVETICA_BOLD, 10, BaseColor.WHITE)));
+            cell.setBackgroundColor(new BaseColor(40, 60, 100));
             cell.setHorizontalAlignment(Element.ALIGN_CENTER);
             cell.setPadding(8);
-            // Texto en blanco para el encabezado
-            cell.getPhrase().getFont().setColor(BaseColor.WHITE);
             tabla.addCell(cell);
         }
 
-        // Llenar datos de la lista
+        // --- DATOS DE LOS USUARIOS ---
+        DateTimeFormatter formato = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
+
         for (ec.edu.sistemalicencias.model.entities.Usuario u : usuarios) {
-            tabla.addCell(crearCeldaCentrada(u.getId().toString()));
-            tabla.addCell(crearCeldaIzquierda(u.getUsername()));
-            tabla.addCell(crearCeldaCentrada(u.getRol()));
 
-            String estadoStr = u.isActivo() ? "ACTIVO" : "INACTIVO";
-            PdfPCell celdaEstado = crearCeldaCentrada(estadoStr);
-            if(u.isActivo()) celdaEstado.getPhrase().getFont().setColor(new BaseColor(0, 150, 0)); // Verde
-            else celdaEstado.getPhrase().getFont().setColor(BaseColor.RED);
+            tabla.addCell(crearCeldaCentrada(u.getId().toString(), BaseColor.BLACK));
+            tabla.addCell(crearCeldaIzquierda(u.getNombreCompleto(), BaseColor.BLACK));
+            tabla.addCell(crearCeldaIzquierda(u.getUsername(), BaseColor.BLACK));
+            tabla.addCell(crearCeldaCentrada(u.getRol(), BaseColor.BLACK));
 
+            // LÓGICA DEL ESTADO (Verde si activo, Rojo si inactivo)
+            String textoEstado = u.isActivo() ? "ACTIVO" : "INACTIVO";
+            BaseColor colorEstado = u.isActivo() ? new BaseColor(0, 128, 0) : BaseColor.RED; // Verde oscuro / Rojo
+
+            PdfPCell celdaEstado = crearCeldaCentrada(textoEstado, colorEstado);
+            celdaEstado.getPhrase().getFont().setStyle(Font.BOLD);
             tabla.addCell(celdaEstado);
+
+            String fecha = (u.getCreatedAt() != null) ? u.getCreatedAt().format(formato) : "N/A";
+            tabla.addCell(crearCeldaCentrada(fecha, BaseColor.BLACK));
         }
 
         documento.add(tabla);
 
-        // Agregar pie de página
+        // 4. Pie de página
         agregarPiePagina(documento);
 
         documento.close();
     }
 
-    // Métodos helper para celdas
-    private static PdfPCell crearCeldaCentrada(String texto) {
-        PdfPCell cell = new PdfPCell(new Phrase(texto, FONT_NORMAL));
+
+    private static PdfPCell crearCeldaCentrada(String texto, BaseColor color) {
+        Font f = FontFactory.getFont(FontFactory.HELVETICA, 10, color);
+        PdfPCell cell = new PdfPCell(new Phrase(texto, f));
         cell.setHorizontalAlignment(Element.ALIGN_CENTER);
         cell.setPadding(5);
+        cell.setBorderColor(BaseColor.LIGHT_GRAY); // Bordes suaves
         return cell;
     }
 
-    private static PdfPCell crearCeldaIzquierda(String texto) {
-        PdfPCell cell = new PdfPCell(new Phrase(texto, FONT_NORMAL));
+    private static PdfPCell crearCeldaIzquierda(String texto, BaseColor color) {
+        Font f = FontFactory.getFont(FontFactory.HELVETICA, 10, color);
+        PdfPCell cell = new PdfPCell(new Phrase(texto, f));
         cell.setHorizontalAlignment(Element.ALIGN_LEFT);
         cell.setPadding(5);
         cell.setPaddingLeft(10);
+        cell.setBorderColor(BaseColor.LIGHT_GRAY);
         return cell;
     }
 
