@@ -3,7 +3,7 @@ package ec.edu.sistemalicencias.dao;
 import ec.edu.sistemalicencias.config.DatabaseConfig;
 import ec.edu.sistemalicencias.model.entities.Usuario;
 import ec.edu.sistemalicencias.model.exceptions.BaseDatosException;
-
+import org.mindrot.jbcrypt.BCrypt;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -13,18 +13,22 @@ public class UsuarioDAO {
     private final DatabaseConfig dbConfig = DatabaseConfig.getInstance();
 
     // 1. LOGIN: Busca un usuario por credenciales
-    public Usuario login(String user, String pass) throws BaseDatosException {
-        String sql = "SELECT * FROM usuarios WHERE username = ? AND password = ?";
+    public Usuario login(String user, String passPlana) throws BaseDatosException {
+        String sql = "SELECT * FROM usuarios WHERE username = ?";
 
         try (Connection con = dbConfig.obtenerConexion();
              PreparedStatement ps = con.prepareStatement(sql)) {
 
             ps.setString(1, user);
-            ps.setString(2, pass);
 
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
-                    return mapearUsuario(rs);
+                    Usuario usuarioEncontrado = mapearUsuario(rs);
+
+
+                    if (BCrypt.checkpw(passPlana, usuarioEncontrado.getPassword())) {
+                        return usuarioEncontrado;
+                    }
                 }
             }
         } catch (SQLException e) {
@@ -32,7 +36,6 @@ public class UsuarioDAO {
         }
         return null;
     }
-
     // 2. LISTAR: Para que el Admin vea a todos en una tabla
     public List<Usuario> listarTodos() throws BaseDatosException {
         List<Usuario> usuarios = new ArrayList<>();
@@ -55,10 +58,13 @@ public class UsuarioDAO {
         String sql;
         boolean esNuevo = (u.getId() == null || u.getId() == 0);
 
+        // CAMBIO: Usamos crypt(?, gen_salt('bf')) para que SQL encripte la clave al guardar
         if (esNuevo) {
-            sql = "INSERT INTO usuarios (email, nombre_completo, username, password, rol, activo) VALUES (?, ?, ?, ?, ?, ?)";
+            sql = "INSERT INTO usuarios (email, nombre_completo, username, password, rol, activo) " +
+                    "VALUES (?, ?, ?, crypt(?, gen_salt('bf')), ?, ?)";
         } else {
-            sql = "UPDATE usuarios SET email=?, nombre_completo=?, username=?, password=?, rol=?, activo=? WHERE id=?";
+            sql = "UPDATE usuarios SET email=?, nombre_completo=?, username=?, " +
+                    "password=crypt(?, gen_salt('bf')), rol=?, activo=? WHERE id=?";
         }
 
         try (Connection con = dbConfig.obtenerConexion();
@@ -67,7 +73,7 @@ public class UsuarioDAO {
             ps.setString(1, u.getEmail());
             ps.setString(2, u.getNombreCompleto());
             ps.setString(3, u.getUsername());
-            ps.setString(4, u.getPassword());
+            ps.setString(4, u.getPassword()); // Pasamos la clave plana, SQL la encriptará
             ps.setString(5, u.getRol());
             ps.setBoolean(6, u.isActivo());
 
@@ -99,10 +105,14 @@ public class UsuarioDAO {
         u.setId(rs.getLong("id"));
         u.setNombreCompleto(rs.getString("nombre_completo"));
         u.setUsername(rs.getString("username"));
+        u.setPassword(rs.getString("password")); // Aquí traemos el hash
         u.setRol(rs.getString("rol"));
         u.setActivo(rs.getBoolean("activo"));
         u.setEmail(rs.getString("email"));
-        u.setCreatedAt(rs.getTimestamp("created_at").toLocalDateTime());
+        Timestamp ts = rs.getTimestamp("created_at");
+        if (ts != null) {
+            u.setCreatedAt(ts.toLocalDateTime());
+        }
         return u;
     }
 
@@ -111,15 +121,14 @@ public class UsuarioDAO {
         String sql = "SELECT * FROM usuarios WHERE id = ?";
         try (Connection con = dbConfig.obtenerConexion();
              PreparedStatement ps = con.prepareStatement(sql)) {
-
             ps.setLong(1, id);
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
-                    return mapearUsuario(rs); // Usamos el método de mapeo que ya creamos
+                    return mapearUsuario(rs);
                 }
             }
         } catch (SQLException e) {
-            throw new BaseDatosException("Error al buscar usuario por ID: " + e.getMessage());
+            throw new BaseDatosException("Error al buscar usuario: " + e.getMessage());
         }
         return null;
     }
